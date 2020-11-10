@@ -15,7 +15,7 @@ export const TaskSchema = new mongoose.Schema({
     executor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: false,
     },
     status: {
         type: String,

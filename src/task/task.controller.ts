@@ -1,11 +1,11 @@
-import {Controller, HttpStatus, Post, Res, Body, Get, NotFoundException, Param} from '@nestjs/common';
+import {Controller, HttpStatus, Post, Res, Body, Get, NotFoundException, Param, Put, Delete} from '@nestjs/common';
 import {TaskService} from "./task.service";
 import {CreateTaskDTO} from "./dto/create-task.dto";
 
 //import { ValidateObjectId } from './shared/pipes/validate-object-id.pipes';
 
 
-@Controller('task')
+@Controller('tasks')
 export class TaskController {
     constructor(private taskService: TaskService) {
     }
@@ -31,12 +31,33 @@ export class TaskController {
         })
     }
 
-    @Get('/tasks')
+    @Get('/')
     async getTasks(@Res() res) {
         const tasks = await this.taskService.getTasks();
         res.status(HttpStatus.OK).json(
             tasks
         )
     }
+
+    @Put('/:taskID')
+    async updateTask(@Res() res, @Param('taskID',/* new ValidateObjectId()*/) taskID, @Body()  createTaskDTO: CreateTaskDTO){
+        const task = await this.taskService.updateTask(taskID,createTaskDTO);
+        if (!task) {
+            throw new NotFoundException('Task does not exist!');
+        }
+        res.status(HttpStatus.OK).json(
+            task
+        )
+    }
+
+    @Delete('/:taskID')
+    async deleteTask(@Res() res, @Param('taskID',/* new ValidateObjectId()*/) taskID){
+        const task = await this.taskService.deleteTask(taskID);
+        res.status(HttpStatus.OK).json({
+            message: `Task ${taskID} was deleted`}
+        )
+    }
+
+
 
 }
