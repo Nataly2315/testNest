@@ -1,6 +1,14 @@
-import {Injectable, UnauthorizedException} from '@nestjs/common';
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    InternalServerErrorException,
+    UnauthorizedException
+} from '@nestjs/common';
 import {JwtService} from "@nestjs/jwt";
 import {UserService} from "../user/user.service";
+import {CreateUserDto} from "../user/dto/create-user.dto";
+import {AuthCredentialsDto} from "./dto/auth-credentials.dto";
 
 
 @Injectable()
@@ -11,20 +19,30 @@ export class AuthService {
     ) {
     }
 
-    async validateUser(email: string, password: string): Promise<any> {
-        const user = await this.userService.findUser(email, password);
+    async login(authCredentialsDto: AuthCredentialsDto): Promise<{ accessToken: string }> {
+        const user = await this.userService.validateUser(authCredentialsDto);
         if (user) {
-            const { password, ...result } = user;
-            return result;
+            return {
+                accessToken: this.jwtService.sign({
+                    id: user._id,
+                    role: user.role, email: user.email
+                }),
+            };
         }
-        return null;
+        else {
+             throw new HttpException('Wrong credentials provided', HttpStatus.BAD_REQUEST);
+        }
     }
 
-    async login(user: any) {
-        console.log(user);
-     //   const payload = user;
-     //   return {
-     //       access_token: this.jwtService.sign(payload),
-     //   };
+    async signUp(createUserDto: CreateUserDto, roles: Array<string>) {
+        try {
+            await this.userService.createUser(createUserDto, roles);
+        } catch (e) {
+            if (e.code === 11000) {
+                throw new HttpException('User already exists.', HttpStatus.BAD_REQUEST)
+            } else {
+                throw new InternalServerErrorException();
+            }
+        }
     }
 }

@@ -6,12 +6,13 @@ import {AuthService} from "./auth.service";
 import {AuthController} from './auth.controller';
 import {UserModule} from "../user/user.module";
 import {JwtStrategy} from "./jwt.strategy";
+import {configModule} from "../configure.root";
 
 @Module({
     imports: [
-        UserModule,
+        UserModule, configModule,
         JwtModule.register({
-                secret:'JWT_SECRET',
+                secret: process.env.JWT_SECRET,
                 signOptions: {
                     expiresIn: 3600,
                 }
@@ -19,7 +20,9 @@ import {JwtStrategy} from "./jwt.strategy";
         ),
         PassportModule.register({defaultStrategy: 'jwt'})],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy]
+    providers: [AuthService, JwtStrategy],
+    exports: [JwtStrategy,
+        PassportModule]
 })
 export class AuthModule {
 }

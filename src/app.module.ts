@@ -4,14 +4,12 @@ import {MongooseModule} from '@nestjs/mongoose';
 import {TaskModule} from './task/task.module';
 import {AuthModule} from './auth/auth.module';
 import {UserModule} from "./user/user.module";
+import {configModule} from "./configure.root";
 
 
 @Module({
     imports: [
-        TaskModule,
-        ConfigModule.forRoot({
-            isGlobal: true
-        }),
+        TaskModule,configModule,
         MongooseModule.forRoot(process.env.MONGODB_CONNECTION_STRING, {
             useNewUrlParser: true,
             useUnifiedTopology: true,

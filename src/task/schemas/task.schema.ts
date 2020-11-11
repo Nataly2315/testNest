@@ -1,4 +1,6 @@
 import * as mongoose from 'mongoose';
+import {roleEnum} from "../../user/enums/role.enum";
+import {statusEnum} from "../enums/status.enum";
 
 export const TaskSchema = new mongoose.Schema({
     author: {
@@ -19,10 +21,11 @@ export const TaskSchema = new mongoose.Schema({
     },
     status: {
         type: String,
+        enum: Object.values(statusEnum),
         required: true,
-    }
-    ,
-    time: {
+    },
+    createdAt: {
+        default: Date.now(),
         type: String,
     },
     comment: {

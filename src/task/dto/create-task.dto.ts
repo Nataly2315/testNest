@@ -4,6 +4,6 @@ export class CreateTaskDTO {
     readonly description: string;
     readonly executor: string;
     readonly status: string;
-    readonly time: string;
+    readonly createdAt: string;
     readonly comment: string;
 }

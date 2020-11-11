@@ -3,15 +3,14 @@ import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {Task} from "./interfaces/task.interface";
 import {CreateTaskDTO} from "./dto/create-task.dto";
+import {User} from "../user/interfaces/user.interface";
 
 @Injectable()
 export class TaskService {
-    constructor(@InjectModel('Task') private readonly taskModel: Model<Task>) {
-        console.log(taskModel);
-    }
+    constructor(@InjectModel('Task') private readonly taskModel: Model<Task>) {}
 
-    async addTask(createTaskDTO: CreateTaskDTO): Promise<Task> {
-        const newTask = await this.taskModel(createTaskDTO);
+    async addTask(createTaskDTO: CreateTaskDTO, user: User): Promise<Task> {
+        const newTask = await this.taskModel(Object.assign(createTaskDTO, {author: user._id}));
         return newTask.save();
     }
 
@@ -25,9 +24,9 @@ export class TaskService {
         return tasks;
     }
 
-    async updateTask(taskID, createTaskDTO: CreateTaskDTO): Promise<Task> {
+    async updateTask(taskID, createTaskDTO: CreateTaskDTO, user: User): Promise<Task> {
         const editedTask = await this.taskModel
-            .findByIdAndUpdate(taskID, createTaskDTO, { new: true });
+            .findByIdAndUpdate(taskID, Object.assign(createTaskDTO,{executor: user._id}), { new: true });
         return editedTask;
     }
 

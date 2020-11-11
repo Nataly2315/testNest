@@ -1,10 +1,10 @@
-import {Injectable} from '@nestjs/common';
+import {ConflictException, Injectable, InternalServerErrorException} from '@nestjs/common';
 import {Model} from 'mongoose';
 import {InjectModel} from "@nestjs/mongoose";
 import {User} from "./interfaces/user.interface";
 import {CreateUserDto} from "./dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
-
+import {AuthCredentialsDto} from "../auth/dto/auth-credentials.dto";
 
 
 @Injectable()
@@ -13,19 +13,31 @@ export class UserService {
     }
 
     async createUser(createUserDto: CreateUserDto, roles: Array<string>): Promise<User> {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hash = await bcrypt.hash(createUserDto.password, salt);
-
+        const hash = await this.hashPassword(createUserDto.password);
         const createdUser = new this.userModel(Object.assign({}, createUserDto, {
             password: hash, roles
         }));
 
         return createdUser.save();
-
     }
 
-    async findUser(email:string, password:string): Promise<User> {
-        return await this.userModel.findOne({email, password}).exec();
+    async getUserByEmail(email: string): Promise<User> {
+        return this.userModel.findOne({email}).exec();
+    }
+
+    async validateUser(authCredentialDto: AuthCredentialsDto):Promise<User> {
+        const {email, password} = authCredentialDto;
+        const user = await this.getUserByEmail(email);
+        if (user && (await  bcrypt.compare(password, user.password))){
+            return user
+        } else {
+           return null
+        }
+    }
+
+    async hashPassword(password: string): Promise<string> {
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        return await bcrypt.hash(password, salt);
     }
 }
