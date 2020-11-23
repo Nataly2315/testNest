@@ -6,21 +6,22 @@ import {
     Body,
     Get,
     NotFoundException,
+    ValidationPipe,
     Param,
     Put,
     Delete,
-    UseGuards, Req
+    UseGuards, Req, UsePipes
 } from '@nestjs/common';
 import {TaskService} from "./task.service";
 import {CreateTaskDTO} from "./dto/create-task.dto";
 import JwtAuthenticationGuard from "../auth/jwt-authentification.guard";
-
-
-//import { ValidateObjectId } from './shared/pipes/validate-object-id.pipes';
+import {Roles} from "../auth/roles.decorator";
+import {RolesGuard} from "../auth/roles.guard";
 
 
 @Controller('tasks')
-@UseGuards(JwtAuthenticationGuard)
+@UseGuards(JwtAuthenticationGuard, RolesGuard)
+@UsePipes(new ValidationPipe())
 export class TaskController {
     constructor(private taskService: TaskService) {
     }
@@ -34,8 +35,7 @@ export class TaskController {
     }
 
     @Get('/:taskID')
-    async getTask(@Res() res, @Param('taskID',/* new ValidateObjectId()*/) taskID) {
-        console.log(taskID);
+    async getTask(@Res() res, @Param('taskID') taskID) {
         const task = await this.taskService.getTask(taskID);
         if (!task) {
             throw new NotFoundException('Task does not exist!');
@@ -54,7 +54,7 @@ export class TaskController {
     }
 
     @Put('/:taskID')
-    async updateTask(@Res() res, @Req() req, @Param('taskID',/* new ValidateObjectId()*/) taskID, @Body()  createTaskDTO: CreateTaskDTO){
+    async updateTask(@Res() res, @Req() req, @Param('taskID') taskID, @Body()  createTaskDTO: CreateTaskDTO){
         const task = await this.taskService.updateTask(taskID,createTaskDTO, req.user);
         if (!task) {
             throw new NotFoundException('Task does not exist!');
@@ -64,8 +64,10 @@ export class TaskController {
         )
     }
 
+
     @Delete('/:taskID')
-    async deleteTask(@Res() res, @Param('taskID',/* new ValidateObjectId()*/) taskID){
+    @Roles('admin')
+    async deleteTask(@Res() res, @Req() req, @Param('taskID') taskID){
         const task = await this.taskService.deleteTask(taskID);
         res.status(HttpStatus.OK).json({
             message: `Task ${taskID} was deleted`}

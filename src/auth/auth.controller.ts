@@ -1,17 +1,14 @@
 import {
     Controller,
     Post,
-    UseGuards,
     Body,
-    Request,
-    Get,
-    InternalServerErrorException, UsePipes, ValidationPipe
+    UsePipes,
+    ValidationPipe, Res, HttpStatus
 } from '@nestjs/common';
+import {Response} from 'express';
 import {AuthService} from "./auth.service";
 import {AuthCredentialsDto} from "./dto/auth-credentials.dto";
 import {CreateUserDto} from "../user/dto/create-user.dto";
-import { ExtractJwt } from 'passport-jwt';
-import JwtAuthenticationGuard from "./jwt-authentification.guard";
 
 @Controller('auth')
 export class AuthController {
@@ -25,8 +22,9 @@ export class AuthController {
 
     @Post('/signUp')
     @UsePipes(ValidationPipe)
-    async signUp(@Body() createUserDto: CreateUserDto, @Body('role') role: Array<string>) {
-            return await this.authService.signUp(createUserDto, role);
+    async signUp(@Res() res: Response, @Body() createUserDto: CreateUserDto) {
+        await this.authService.signUp(createUserDto);
+        res.status(HttpStatus.OK).json({message: 'user was created'});
     }
 
 }

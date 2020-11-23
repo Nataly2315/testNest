@@ -12,10 +12,10 @@ export class UserService {
     constructor(@InjectModel('User') private readonly userModel: Model<User>) {
     }
 
-    async createUser(createUserDto: CreateUserDto, roles: Array<string>): Promise<User> {
+    async createUser(createUserDto: CreateUserDto): Promise<User> {
         const hash = await this.hashPassword(createUserDto.password);
         const createdUser = new this.userModel(Object.assign({}, createUserDto, {
-            password: hash, roles
+            password: hash, roles: "user"
         }));
 
         return createdUser.save();
@@ -23,6 +23,10 @@ export class UserService {
 
     async getUserByEmail(email: string): Promise<User> {
         return this.userModel.findOne({email}).exec();
+    }
+
+    async getUserById(id: string): Promise<User> {
+        return this.userModel.findById(id).exec();
     }
 
     async validateUser(authCredentialDto: AuthCredentialsDto):Promise<User> {
@@ -33,6 +37,10 @@ export class UserService {
         } else {
            return null
         }
+    }
+
+    async getAllUsers(): Promise<User[]>{
+        return this.userModel.find().exec();
     }
 
     async hashPassword(password: string): Promise<string> {

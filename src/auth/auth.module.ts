@@ -7,6 +7,7 @@ import {AuthController} from './auth.controller';
 import {UserModule} from "../user/user.module";
 import {JwtStrategy} from "./jwt.strategy";
 import {configModule} from "../configure.root";
+import {RolesGuard} from "./roles.guard";
 
 @Module({
     imports: [
@@ -20,7 +21,7 @@ import {configModule} from "../configure.root";
         ),
         PassportModule.register({defaultStrategy: 'jwt'})],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy],
+    providers: [AuthService, JwtStrategy, RolesGuard],
     exports: [JwtStrategy,
         PassportModule]
 })

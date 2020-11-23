@@ -25,7 +25,7 @@ export class AuthService {
             return {
                 accessToken: this.jwtService.sign({
                     id: user._id,
-                    role: user.role, email: user.email
+                    roles: user.roles, email: user.email
                 }),
             };
         }
@@ -34,9 +34,9 @@ export class AuthService {
         }
     }
 
-    async signUp(createUserDto: CreateUserDto, roles: Array<string>) {
+    async signUp(createUserDto: CreateUserDto) {
         try {
-            await this.userService.createUser(createUserDto, roles);
+            await this.userService.createUser(createUserDto);
         } catch (e) {
             if (e.code === 11000) {
                 throw new HttpException('User already exists.', HttpStatus.BAD_REQUEST)
