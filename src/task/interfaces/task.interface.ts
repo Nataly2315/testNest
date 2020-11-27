@@ -8,4 +8,5 @@ export interface Task extends Document {
     readonly status: string;
     readonly time: string;
     readonly comment: string;
+    readonly project: string;
 }

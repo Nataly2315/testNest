@@ -4,6 +4,7 @@ import {TaskModule} from './task/task.module';
 import {AuthModule} from './auth/auth.module';
 import {UserModule} from "./user/user.module";
 import {configModule} from "./configure.root";
+import { ProjectModule } from './project/project.module';
 
 
 @Module({
@@ -13,9 +14,11 @@ import {configModule} from "./configure.root";
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useCreateIndex: true,
+            useFindAndModify: false
         }),
         UserModule,
-        AuthModule
+        AuthModule,
+        ProjectModule
     ],
     controllers: [],
     providers: [],

@@ -14,9 +14,9 @@ import {
 } from '@nestjs/common';
 import {TaskService} from "./task.service";
 import {CreateTaskDTO} from "./dto/create-task.dto";
-import JwtAuthenticationGuard from "../auth/jwt-authentification.guard";
-import {Roles} from "../auth/roles.decorator";
-import {RolesGuard} from "../auth/roles.guard";
+import JwtAuthenticationGuard from "../auth/guards/jwt-authentification.guard";
+import {Roles} from "../auth/decorators/roles.decorator";
+import {RolesGuard} from "../auth/guards/roles.guard";
 
 
 @Controller('tasks')
@@ -27,11 +27,9 @@ export class TaskController {
     }
 
     @Post()
-    async addTask(@Req() req, @Res() res, @Body() createTaskDTO: CreateTaskDTO) {
+    async addTask(@Req() req, @Body() createTaskDTO: CreateTaskDTO) {
         const newTask = await this.taskService.addTask(createTaskDTO, req.user);
-        return res.status(HttpStatus.OK).json({
-            task: newTask
-        })
+        return newTask;
     }
 
     @Get('/:taskID')
@@ -55,7 +53,7 @@ export class TaskController {
 
     @Put('/:taskID')
     async updateTask(@Res() res, @Req() req, @Param('taskID') taskID, @Body()  createTaskDTO: CreateTaskDTO){
-        const task = await this.taskService.updateTask(taskID,createTaskDTO, req.user);
+        const task = await this.taskService.updateTask(taskID, createTaskDTO, req.user);
         if (!task) {
             throw new NotFoundException('Task does not exist!');
         }
@@ -64,9 +62,7 @@ export class TaskController {
         )
     }
 
-
     @Delete('/:taskID')
-    @Roles('admin')
     async deleteTask(@Res() res, @Req() req, @Param('taskID') taskID){
         const task = await this.taskService.deleteTask(taskID);
         res.status(HttpStatus.OK).json({

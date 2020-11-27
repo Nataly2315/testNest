@@ -1,10 +1,12 @@
-import {ConflictException, Injectable, InternalServerErrorException} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {Model} from 'mongoose';
 import {InjectModel} from "@nestjs/mongoose";
 import {User} from "./interfaces/user.interface";
 import {CreateUserDto} from "./dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import {AuthCredentialsDto} from "../auth/dto/auth-credentials.dto";
+import {UpdateUserDto} from "./dto/update-user.dto";
+import {ObjectIdDTO} from "./dto/object-id.dto";
 
 
 @Injectable()
@@ -25,21 +27,25 @@ export class UserService {
         return this.userModel.findOne({email}).exec();
     }
 
-    async getUserById(id: string): Promise<User> {
+    getUserById(id: ObjectIdDTO): Promise<User> {
         return this.userModel.findById(id).exec();
     }
 
-    async validateUser(authCredentialDto: AuthCredentialsDto):Promise<User> {
+    updateUser(id: ObjectIdDTO, updateUserDto: UpdateUserDto): Promise<User>{
+        return this.userModel.findByIdAndUpdate(id, updateUserDto, {new: true}).exec();
+    }
+
+    async validateUser(authCredentialDto: AuthCredentialsDto): Promise<User> {
         const {email, password} = authCredentialDto;
         const user = await this.getUserByEmail(email);
-        if (user && (await  bcrypt.compare(password, user.password))){
+        if (user && (await bcrypt.compare(password, user.password))) {
             return user
         } else {
-           return null
+            return null
         }
     }
 
-    async getAllUsers(): Promise<User[]>{
+    getAllUsers(): Promise<User[]> {
         return this.userModel.find().exec();
     }
 

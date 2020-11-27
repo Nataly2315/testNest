@@ -3,7 +3,7 @@ import {UserController} from './user.controller';
 import {UserSchema} from "./schemas/user.schemas";
 import {UserService} from './user.service';
 import {MongooseModule} from "@nestjs/mongoose";
-import {RolesGuard} from "../auth/roles.guard";
+import {RolesGuard} from "../auth/guards/roles.guard";
 
 
 @Module({

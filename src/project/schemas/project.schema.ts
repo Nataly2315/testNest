@@ -1,7 +1,8 @@
-import * as mongoose from 'mongoose';
+import * as mongoose from "mongoose"
 import {statusEnum} from "../../enums/status.enum";
+import {Schema} from "mongoose";
 
-export const TaskSchema = new mongoose.Schema({
+export const ProjectSchema = new mongoose.Schema({
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -13,7 +14,7 @@ export const TaskSchema = new mongoose.Schema({
     description: {
         type: String,
     },
-    executor: {
+    responsible: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: false,
@@ -23,16 +24,20 @@ export const TaskSchema = new mongoose.Schema({
         enum: Object.values(statusEnum),
         required: true,
     },
+    dueDate: {
+        type: Date,
+    },
     createdAt: {
+        default: Date.now(),
+        type: Date,
+    },
+    updatedAt: {
         default: Date.now(),
         type: Date,
     },
     comment: {
         type: String,
     },
-    project:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project',
-        required: true,
-    }
-});
+    tasks: [{
+      type: Schema.Types.ObjectId, ref: 'Task' }]
+})

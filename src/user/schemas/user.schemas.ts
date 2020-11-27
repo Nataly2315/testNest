@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import {roleEnum} from "../enums/role.enum";
+import {roleEnum} from "../../enums/role.enum";
 
 export const UserSchema = new mongoose.Schema({
     email: {

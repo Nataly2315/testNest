@@ -11,11 +11,21 @@
 </div>
 
 <script>
-    var socket = io('http://localhost:3000');
+    var socket = io('http://localhost:3000', {
+        transportOptions: {
+            polling: {
+                extraHeaders: {
+                    Authorization: "Bearer erdyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYmI2NjQzNGYxMTYwMWNiODJkYTE0NyIsInJvbGVzIjpbImFkbWluIl0sImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwiaWF0IjoxNjA2NDAwMDYwLCJleHAiOjE2MDY0MDM2NjB9.RWZmATz84364BRQZyYb01G-uciGbP_e_R8WI2BeUsho",
+                }
+            }
+        }
+
+
+    });
     var app = new Vue({
         el: "#v-app",
         data: {
-            text:"",
+            text: "",
             socket: socket
         },
         methods: {

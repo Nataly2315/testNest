@@ -3,7 +3,6 @@ import {
     HttpStatus,
     Injectable,
     InternalServerErrorException,
-    UnauthorizedException
 } from '@nestjs/common';
 import {JwtService} from "@nestjs/jwt";
 import {UserService} from "../user/user.service";
@@ -28,9 +27,8 @@ export class AuthService {
                     roles: user.roles, email: user.email
                 }),
             };
-        }
-        else {
-             throw new HttpException('Wrong credentials provided', HttpStatus.BAD_REQUEST);
+        } else {
+            throw new HttpException('Wrong credentials provided', HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -45,4 +43,15 @@ export class AuthService {
             }
         }
     }
+
+
+     async validate(token: string): Promise<any> {
+        try {
+            const client = await this.jwtService.verifyAsync(token);
+            return client;
+        } catch (e) {
+            return null;
+        }
+    }
+
 }

@@ -5,16 +5,22 @@ import {Task} from "./interfaces/task.interface";
 import {CreateTaskDTO} from "./dto/create-task.dto";
 import {User} from "../user/interfaces/user.interface";
 import {EventsGateway} from "../events/events.gateway";
-import {TaskChanges} from "./interfaces/taskChanges.interface";
+import {TaskChanges} from "./interfaces/task-change-object.interface";
+import {Project} from "../project/interfaces/project.interface";
+
 
 @Injectable()
 export class TaskService {
-    constructor(@InjectModel('Task') private readonly taskModel: Model<Task>, private socket: EventsGateway) {
+    constructor(@InjectModel('Task') private readonly taskModel: Model<Task>, @InjectModel('Project') private readonly projectModel: Model<Project>, private socket: EventsGateway) {
         this.checkTasksChanges();
     }
 
     async addTask(createTaskDTO: CreateTaskDTO, user: User): Promise<Task> {
         const newTask = await this.taskModel(Object.assign(createTaskDTO, {author: user._id}));
+        await this.projectModel.findByIdAndUpdate(newTask.project,{
+            '$push': {
+                'tasks': newTask.id
+            }})
         return newTask.save();
     }
 
@@ -29,16 +35,22 @@ export class TaskService {
     }
 
     async updateTask(taskID, createTaskDTO: CreateTaskDTO, user: User): Promise<Task> {
-        const editedTask = await this.taskModel
-            .findByIdAndUpdate(taskID, Object.assign(createTaskDTO, {executor: user._id}), {new: true});
+        const editedTask = await this.taskModel.findByIdAndUpdate(taskID, Object.assign(createTaskDTO, {executor: user._id}), {new: true});
         return editedTask;
     }
 
     async deleteTask(taskID): Promise<Task> {
-        return await this.taskModel.findByIdAndDelete(taskID);
+        const deletedTask = await this.taskModel.findByIdAndDelete(taskID);
+        await this.projectModel.findByIdAndUpdate(deletedTask.project,{
+            '$pull': {
+                'tasks': [deletedTask.id]
+            }})
+        return  deletedTask;
     }
 
     async checkTasksChanges(): Promise<void> {
-        this.taskModel.watch().on('change', (data:TaskChanges) => { this.socket.sendEvent( data.operationType ,data)})
+        this.taskModel.watch().on('change', (data: TaskChanges) => {
+            this.socket.sendEvent(data.operationType, data)
+        })
     }
 }
