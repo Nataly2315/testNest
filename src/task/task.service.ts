@@ -7,6 +7,8 @@ import {User} from "../user/interfaces/user.interface";
 import {EventsGateway} from "../events/events.gateway";
 import {TaskChanges} from "./interfaces/task-change-object.interface";
 import {Project} from "../project/interfaces/project.interface";
+import {TaskFilterDto} from "./dto/task-filter.dto";
+import * as _ from "lodash";
 
 
 @Injectable()
@@ -17,10 +19,11 @@ export class TaskService {
 
     async addTask(createTaskDTO: CreateTaskDTO, user: User): Promise<Task> {
         const newTask = await this.taskModel(Object.assign(createTaskDTO, {author: user._id}));
-        await this.projectModel.findByIdAndUpdate(newTask.project,{
+        await this.projectModel.findByIdAndUpdate(newTask.project, {
             '$push': {
                 'tasks': newTask.id
-            }})
+            }
+        })
         return newTask.save();
     }
 
@@ -29,8 +32,9 @@ export class TaskService {
         return task;
     }
 
-    async getTasks(): Promise<Task[]> {
-        const tasks = await this.taskModel.find().exec();
+    async getTasks(query: TaskFilterDto): Promise<Task[]> {
+        const pageSize = query.pageSize || 100;
+        const tasks = await this.taskModel.find(_.omit(query, ["pageSize", "page"])).skip(query.page * pageSize).limit(pageSize).exec();
         return tasks;
     }
 
@@ -40,12 +44,8 @@ export class TaskService {
     }
 
     async deleteTask(taskID): Promise<Task> {
-        const deletedTask = await this.taskModel.findByIdAndDelete(taskID);
-        await this.projectModel.findByIdAndUpdate(deletedTask.project,{
-            '$pull': {
-                'tasks': [deletedTask.id]
-            }})
-        return  deletedTask;
+        return await this.taskModel.findByIdAndDelete(taskID);
+
     }
 
     async checkTasksChanges(): Promise<void> {

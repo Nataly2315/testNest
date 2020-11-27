@@ -33,7 +33,7 @@ export class UserController {
 
     @Get('/:userId')
     @Roles(roleEnum.admin)
-    async getUser(@Param('userId') userID: ObjectIdDTO) {
+    async getUser(@Param('userId') userID) {
         const user = this.userService.getUserById(userID);
         if (!user) {
             throw new NotFoundException('User does not exist!');
@@ -43,7 +43,7 @@ export class UserController {
 
     @Put('/:userId')
     @Roles(roleEnum.admin)
-    async updateUser(@Param('userId') userID: ObjectIdDTO, @Body() updateUserDto: UpdateUserDto) {
+    async updateUser(@Param('userId') userID, @Body() updateUserDto: UpdateUserDto) {
        const user = this.userService.updateUser(userID, updateUserDto);
         if (!user) {
             throw new NotFoundException('User does not exist!');

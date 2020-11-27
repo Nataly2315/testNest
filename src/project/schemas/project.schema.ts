@@ -37,7 +37,5 @@ export const ProjectSchema = new mongoose.Schema({
     },
     comment: {
         type: String,
-    },
-    tasks: [{
-      type: Schema.Types.ObjectId, ref: 'Task' }]
+    }
 })

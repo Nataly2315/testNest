@@ -12,5 +12,4 @@ export interface Project extends Document {
     dueDate: Date;
     createdAt: Date;
     updatedAt: Date;
-    tasks: Task[]
 }

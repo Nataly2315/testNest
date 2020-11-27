@@ -10,13 +10,13 @@ import {
     Param,
     Put,
     Delete,
-    UseGuards, Req, UsePipes
+    UseGuards, Req, UsePipes, Query
 } from '@nestjs/common';
 import {TaskService} from "./task.service";
 import {CreateTaskDTO} from "./dto/create-task.dto";
 import JwtAuthenticationGuard from "../auth/guards/jwt-authentification.guard";
-import {Roles} from "../auth/decorators/roles.decorator";
 import {RolesGuard} from "../auth/guards/roles.guard";
+import {TaskFilterDto} from "./dto/task-filter.dto";
 
 
 @Controller('tasks')
@@ -44,15 +44,12 @@ export class TaskController {
     }
 
     @Get('/')
-    async getTasks(@Res() res) {
-        const tasks = await this.taskService.getTasks();
-        res.status(HttpStatus.OK).json(
-            tasks
-        )
+    async getTasks(@Query() query: TaskFilterDto) {
+        return  await this.taskService.getTasks(query);
     }
 
     @Put('/:taskID')
-    async updateTask(@Res() res, @Req() req, @Param('taskID') taskID, @Body()  createTaskDTO: CreateTaskDTO){
+    async updateTask(@Res() res, @Req() req, @Param('taskID') taskID, @Body()  createTaskDTO: CreateTaskDTO) {
         const task = await this.taskService.updateTask(taskID, createTaskDTO, req.user);
         if (!task) {
             throw new NotFoundException('Task does not exist!');
@@ -63,13 +60,13 @@ export class TaskController {
     }
 
     @Delete('/:taskID')
-    async deleteTask(@Res() res, @Req() req, @Param('taskID') taskID){
+    async deleteTask(@Res() res, @Req() req, @Param('taskID') taskID) {
         const task = await this.taskService.deleteTask(taskID);
         res.status(HttpStatus.OK).json({
-            message: `Task ${taskID} was deleted`}
+                message: `Task ${taskID} was deleted`
+            }
         )
     }
-
 
 
 }
