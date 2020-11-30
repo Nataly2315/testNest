@@ -9,14 +9,14 @@ import {
     UsePipes,
     ValidationPipe,
     UseGuards,
-    Req, NotFoundException, HttpStatus, Query
+    Req, NotFoundException, HttpStatus, Query, Res
 } from '@nestjs/common';
+import {ApiCreatedResponse, ApiNotFoundResponse, ApiOperation} from "@nestjs/swagger";
 import {ProjectService} from './project.service';
 import {CreateProjectDto} from './dto/create-project.dto';
 import {UpdateProjectDto} from './dto/update-project.dto';
 import JwtAuthenticationGuard from "../auth/guards/jwt-authentification.guard";
 import {ProjectFilterDto} from "./dto/filter-project.dto";
-import {ApiBody} from "@nestjs/swagger";
 import {FiltersPipe} from "./filters.pipe";
 
 
@@ -33,11 +33,16 @@ export class ProjectController {
     }
 
     @Get()
+    @ApiCreatedResponse({ description: 'OK'})
+    @ApiOperation({ operationId: 'getProjectList', description: 'get project list' })
     findAll(@Query(new FiltersPipe()) query: ProjectFilterDto) {
         return this.projectService.findAll(query);
     }
 
     @Get(':id')
+    @ApiCreatedResponse({ description: 'OK'})
+    @ApiNotFoundResponse({ type: NotFoundException, description: 'Project does not exist!' })
+    @ApiOperation({ operationId: 'getProject', description: 'get project info by id' })
     async findOne(@Param('id') id) {
         const project = await this.projectService.findOne(id);
         if (!project) {
@@ -47,15 +52,16 @@ export class ProjectController {
     }
 
     @Get(':id/tasks')
-    async findTasks(@Param('id') id) {
-        const project = await this.projectService.findTasksByProject(id);
-        if (!project) {
-            throw new NotFoundException('Project does not exist!');
-        }
-        return project;
+    @ApiCreatedResponse({ description: 'OK'})
+    @ApiOperation({ operationId: 'getTasksByProject', description: 'get tasks list by project id' })
+    async findTasks(@Param('id') id, @Res() res) {
+    res.redirect(`/tasks?project=${id}`);
     }
 
     @Put(':id')
+    @ApiCreatedResponse({ description: 'OK'})
+    @ApiNotFoundResponse({ type: NotFoundException, description: 'Project does not exist!' })
+    @ApiOperation({ operationId: 'editProject', description: 'edit project info' })
     async update(@Param('id') id, @Body() updateProjectDto: UpdateProjectDto) {
         const project = await this.projectService.update(id, updateProjectDto);
         if (!project) {
@@ -65,6 +71,9 @@ export class ProjectController {
     }
 
     @Delete(':id')
+    @ApiCreatedResponse({ description: 'OK'})
+    @ApiNotFoundResponse({ type: NotFoundException, description: 'Project does not exist!' })
+    @ApiOperation({ operationId: 'deleteProject', description: 'delete Project' })
     async remove(@Param('id') id) {
         const project = await this.projectService.remove(id);
         if (!project) {
