@@ -1,6 +1,5 @@
 import * as mongoose from "mongoose"
 import {statusEnum} from "../../enums/status.enum";
-import {Schema} from "mongoose";
 
 export const ProjectSchema = new mongoose.Schema({
     author: {
@@ -10,6 +9,7 @@ export const ProjectSchema = new mongoose.Schema({
     },
     title: {
         type: String,
+        required: true,
     },
     description: {
         type: String,

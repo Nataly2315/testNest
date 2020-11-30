@@ -4,13 +4,12 @@ import {UpdateProjectDto} from './dto/update-project.dto';
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongodb";
 import * as mongoose from "mongoose";
+import * as _ from "lodash";
 import {Project} from "./interfaces/project.interface";
 import {ObjectIdDTO} from "../user/dto/object-id.dto";
 import {User} from "../user/interfaces/user.interface";
 import {Task} from "../task/interfaces/task.interface";
 import {ProjectFilterDto} from "./dto/filter-project.dto";
-import * as _ from "lodash";
-import {TaskFilterDto} from "../task/dto/task-filter.dto";
 
 
 @Injectable()
@@ -24,19 +23,26 @@ export class ProjectService {
     }
 
     async findAll(query: ProjectFilterDto): Promise<{ projects: Project[], pages: number }> {
+
         const page = +query.page || 1;
         const limit = +query.pageSize || 100;
         const skip = (page - 1) * limit;
-        const [result] = await this.projectModel.aggregate([
-            {
-                $facet: {
-                    count: [{$count: "value"}],
-                    projects: [{$match: _.omit(query, ["pageSize", "page"])}, {$skip: skip}, {$limit: limit}]
-                }
-            },
-            {$unwind: "$count"},
-            {$set: {count: "$count.value"}}
-        ]);
+        if (query.author){
+            query.author = mongoose.Types.ObjectId(query.author);
+        }
+        if (query.responsible){
+            query.responsible = mongoose.Types.ObjectId(query.responsible);
+        }
+            const [result] = await this.projectModel.aggregate([
+                {
+                    $facet: {
+                        count: [{$count: "value"}],
+                        projects: [{$match: _.omit(query, ["pageSize", "page"])}, {$skip: skip}, {$limit: limit}]
+                    }
+                },
+                {$unwind: "$count"},
+                {$set: {count: "$count.value"}}
+            ]);
         return {projects: result.projects, pages: Math.trunc(result.count / limit) || 1}
     }
 

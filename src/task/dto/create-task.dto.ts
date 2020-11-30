@@ -8,6 +8,8 @@ export class CreateTaskDTO {
     @IsString()
     @IsNotEmpty()
     readonly description: string;
+    @IsString()
+    @IsNotEmpty()
     @IsMongoId()
     readonly project: string;
     @IsString()

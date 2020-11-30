@@ -19,11 +19,6 @@ export class TaskService {
 
     async addTask(createTaskDTO: CreateTaskDTO, user: User): Promise<Task> {
         const newTask = await this.taskModel(Object.assign(createTaskDTO, {author: user._id}));
-        await this.projectModel.findByIdAndUpdate(newTask.project, {
-            '$push': {
-                'tasks': newTask.id
-            }
-        })
         return newTask.save();
     }
 
@@ -45,7 +40,6 @@ export class TaskService {
 
     async deleteTask(taskID): Promise<Task> {
         return await this.taskModel.findByIdAndDelete(taskID);
-
     }
 
     async checkTasksChanges(): Promise<void> {
