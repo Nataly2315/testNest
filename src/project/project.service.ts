@@ -23,27 +23,18 @@ export class ProjectService {
     }
 
     async findAll(query: ProjectFilterDto): Promise<{ projects: Project[], pages: number }> {
-
-        const page = +query.page || 1;
-        const limit = +query.pageSize || 100;
-        const skip = (page - 1) * limit;
-        if (query.author){
-            query.author = mongoose.Types.ObjectId(query.author);
-        }
-        if (query.responsible){
-            query.responsible = mongoose.Types.ObjectId(query.responsible);
-        }
-            const [result] = await this.projectModel.aggregate([
+        const skip = (query.page - 1) * query.pageSize;
+        const [result] = await this.projectModel.aggregate([
                 {
                     $facet: {
                         count: [{$count: "value"}],
-                        projects: [{$match: _.omit(query, ["pageSize", "page"])}, {$skip: skip}, {$limit: limit}]
+                        projects: [{$match: _.omit(query, ["pageSize", "page"])}, {$skip: skip}, {$limit: query.pageSize}]
                     }
                 },
                 {$unwind: "$count"},
                 {$set: {count: "$count.value"}}
             ]);
-        return {projects: result.projects, pages: Math.trunc(result.count / limit) || 1}
+        return {projects: result.projects, pages: Math.trunc(result.count / query.pageSize) || 1}
     }
 
     async findOne(id: ObjectIdDTO): Promise<Project> {

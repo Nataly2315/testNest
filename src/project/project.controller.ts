@@ -14,11 +14,10 @@ import {
 import {ProjectService} from './project.service';
 import {CreateProjectDto} from './dto/create-project.dto';
 import {UpdateProjectDto} from './dto/update-project.dto';
-import {ObjectIdDTO} from "../user/dto/object-id.dto";
 import JwtAuthenticationGuard from "../auth/guards/jwt-authentification.guard";
-import {IsMongoId} from "class-validator";
-import {TaskFilterDto} from "../task/dto/task-filter.dto";
 import {ProjectFilterDto} from "./dto/filter-project.dto";
+import {ApiBody} from "@nestjs/swagger";
+import {FiltersPipe} from "./filters.pipe";
 
 
 @Controller('projects')
@@ -34,7 +33,7 @@ export class ProjectController {
     }
 
     @Get()
-    findAll(@Query() query: ProjectFilterDto) {
+    findAll(@Query(new FiltersPipe()) query: ProjectFilterDto) {
         return this.projectService.findAll(query);
     }
 
